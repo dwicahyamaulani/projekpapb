@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "909299498301",
+    "project_id": "projekpapbpakadam",
+    "storage_bucket": "projekpapbpakadam.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:909299498301:android:0be0ac5602b335d44b9954",
+        "android_client_info": {
+          "package_name": "com.example.projekpapbpakadam"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCL4ZaC3jEO9mx8a-SpZTGYhFwZo8-rLbc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
