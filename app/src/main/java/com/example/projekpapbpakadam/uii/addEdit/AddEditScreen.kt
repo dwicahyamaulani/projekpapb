@@ -1,11 +1,14 @@
 package com.example.projekpapbpakadam.uii.addEdit
 
+import android.Manifest
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,80 +19,114 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.projekpapbpakadam.core.camera.CameraUtils
-import android.Manifest
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddEditScreen(navController: NavController) {
+fun AddEditScreen(
+    navController: NavController,
+    vm: AddEditViewModel
+) {
     val context = LocalContext.current
-    var title by remember { mutableStateOf("") }
-    var amount by remember { mutableStateOf("") }
-    var photoUri by remember { mutableStateOf<Uri?>(null) }
+    var photoPreview by remember { mutableStateOf<Uri?>(vm.state.photoLocalPath?.let(Uri::parse)) }
 
-    // Launcher kamera
     val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture(),
-        onResult = { success ->
-            if (!success) photoUri = null
+        ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (!success) {
+            photoPreview = null
+            vm.setPhotoPath(null)
+        } else {
+            Toast.makeText(context, "Foto tersimpan", Toast.LENGTH_SHORT).show()
         }
-    )
+    }
 
-    val cameraPermission = Manifest.permission.CAMERA
     val launcherPermission = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { granted ->
-            if (granted) {
-                val uri = CameraUtils.createImageUri(context)
-                photoUri = uri
-                cameraLauncher.launch(uri)
-            } else {
-                Toast.makeText(context, "Izin kamera ditolak", Toast.LENGTH_SHORT).show()
-            }
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            val uri = CameraUtils.createImageUri(context)
+            photoPreview = uri
+            vm.setPhotoPath(uri?.toString())
+            cameraLauncher.launch(uri)
+        } else {
+            Toast.makeText(context, "Izin kamera ditolak", Toast.LENGTH_SHORT).show()
         }
-    )
+    }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Tambah Pengeluaran") }) },
+        topBar = {
+            TopAppBar(
+                title = { Text("Tambah Pengeluaran") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Kembali")
+                    }
+                }
+            )
+        },
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                // nanti disini simpan data ke database
-                navController.popBackStack()
-            }) {
+            FloatingActionButton(onClick = { vm.save { navController.popBackStack() } }) {
                 Text("Simpan")
             }
         }
-    ) { paddingValues ->
+    ) { padding ->
         Column(
             modifier = Modifier
-                .padding(paddingValues)
+                .padding(padding)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             OutlinedTextField(
-                value = title,
-                onValueChange = { title = it },
+                value = vm.state.title,
+                onValueChange = vm::setTitle,
                 label = { Text("Judul") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
-                value = amount,
-                onValueChange = { amount = it },
+                value = vm.state.amount,
+                onValueChange = vm::setAmount,
                 label = { Text("Nominal (Rp)") },
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Tombol ambil foto
             Button(
-                onClick = { launcherPermission.launch(cameraPermission) },
+                onClick = { launcherPermission.launch(Manifest.permission.CAMERA) },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
-            ) {
-                Text("📸 Ambil Foto Struk")
-            }
+            ) { Text("📸 Ambil Foto Struk") }
 
-            // Preview foto hasil kamera
-            photoUri?.let {
+            val ui = vm.state
+            if (ui.photoLocalPath != null) {
+                val uri = remember(ui.photoLocalPath) { Uri.parse(ui.photoLocalPath) }
+                val fileName = uri.lastPathSegment ?: "foto_struk.jpg"
+
+                ElevatedCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.elevatedCardElevation()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = rememberAsyncImagePainter(uri),
+                            contentDescription = null,
+                            modifier = Modifier.size(56.dp),
+                            contentScale = ContentScale.Crop
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text("Foto terlampir", style = MaterialTheme.typography.titleSmall)
+                            Text(fileName, style = MaterialTheme.typography.bodySmall)
+                        }
+                        TextButton(onClick = {
+                            vm.setPhotoPath(null)
+                            photoPreview = null
+                        }) { Text("Hapus") }
+                    }
+                }
+            }
+            photoPreview?.let {
                 Image(
                     painter = rememberAsyncImagePainter(it),
                     contentDescription = "Foto Struk",

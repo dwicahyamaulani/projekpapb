@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "909299498301",
-    "project_id": "projekpapbpakadam",
-    "storage_bucket": "projekpapbpakadam.firebasestorage.app"
+    "project_number": "208684427951",
+    "project_id": "pocketspends-d75a1",
+    "storage_bucket": "pocketspends-d75a1.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:909299498301:android:0be0ac5602b335d44b9954",
+        "mobilesdk_app_id": "1:208684427951:android:028fff1376d6591b86825a",
         "android_client_info": {
           "package_name": "com.example.projekpapbpakadam"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCL4ZaC3jEO9mx8a-SpZTGYhFwZo8-rLbc"
+          "current_key": "AIzaSyCQ6_yA0UB-MpaREsz2OcCqmbZsnwYpDeQ"
         }
       ],
       "services": {

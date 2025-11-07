@@ -23,7 +23,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             ProjekPAPBPakAdamTheme {
                 val navController = rememberNavController()
-                AppNavGraph(navController)
+                val repo = (application as App).repository
+
+                AppNavGraph(navController = navController, repo = repo)
             }
         }
     }

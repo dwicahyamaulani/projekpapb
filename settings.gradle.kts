@@ -1,3 +1,4 @@
+// Kotlin
 pluginManagement {
     repositories {
         google {
@@ -10,6 +11,9 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
+    plugins {
+        id("com.google.gms.google-services") version "4.4.2"
+    }
 }
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
@@ -21,4 +25,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "Projek PAPB Pak Adam"
 include(":app")
- 
