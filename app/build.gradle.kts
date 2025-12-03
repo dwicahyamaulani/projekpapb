@@ -5,6 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.kapt")
     id("com.google.gms.google-services")
 }
+val camerax_version = "1.3.0"
 
 android {
     namespace = "com.example.projekpapbpakadam"
@@ -55,6 +56,7 @@ dependencies {
     // Navigation
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.foundation)
 
     // Testing
     testImplementation(libs.junit)
@@ -83,4 +85,9 @@ dependencies {
     // Lain-lain
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation("com.google.android.gms:play-services-location:21.3.0")
+
+    implementation("androidx.camera:camera-core:${camerax_version}")
+    implementation("androidx.camera:camera-camera2:${camerax_version}")
+    implementation("androidx.camera:camera-lifecycle:${camerax_version}")
+    implementation("androidx.camera:camera-view:${camerax_version}")
 }

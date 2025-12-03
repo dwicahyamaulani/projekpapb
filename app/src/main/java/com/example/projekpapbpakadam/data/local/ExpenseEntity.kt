@@ -9,11 +9,12 @@ data class ExpenseEntity(
     val title: String,
     val amount: Long,
     val category: String,
+    val type: String,              // "INCOME" atau "EXPENSE"
     val dateEpochMillis: Long,
     val latitude: Double?,
     val longitude: Double?,
-    val localPhotoPath: String?,       // path file lokal
-    val remotePhotoUrl: String?,       // URL di Firebase Storage
-    val synced: Boolean,               // sudah tersinkron?
-    val updatedAt: Long                // epoch millis untuk konflik
+    val localPhotoPath: String?,
+    val remotePhotoUrl: String?,
+    val synced: Boolean,
+    val updatedAt: Long
 )

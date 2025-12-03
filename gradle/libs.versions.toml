@@ -13,6 +13,7 @@ navigationCompose = "2.8.2"
 googleServices = "4.4.2"
 firebaseFirestore = "26.0.2"
 firebaseBom = "34.5.0"
+foundation = "1.9.5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -37,6 +38,7 @@ firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-fires
 firebase-storage-ktx  = { group = "com.google.firebase", name = "firebase-storage-ktx" }
 firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
 auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx" }
+androidx-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
