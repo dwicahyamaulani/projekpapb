@@ -24,7 +24,9 @@ app/
 │   │   │
 │   │   ├── core/
 │   │   │   └── camera/
-│   │   │       └── CameraUtils.kt     # Utilitas untuk pengambilan gambar via kamera
+│   │   │       └── CameraUtils.kt
+|   |   |   └── location/
+│   │   │       └── LocationUtils.kt
 │   │   │
 │   │   ├── data/
 │   │   │   ├── local/
