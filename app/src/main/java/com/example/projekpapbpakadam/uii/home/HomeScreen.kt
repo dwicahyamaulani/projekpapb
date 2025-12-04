@@ -22,6 +22,16 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.projekpapbpakadam.uii.nav.Routes
+import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.Text
+import androidx.compose.ui.window.Dialog
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.font.FontWeight
+import com.example.projekpapbpakadam.uii.nav.BottomBar
+
+
 
 @Composable
 fun HomeScreen(navController: NavController, vm: HomeViewModel) {
@@ -40,9 +50,11 @@ fun HomeScreen(navController: NavController, vm: HomeViewModel) {
 
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = { navController.navigate(Routes.ADD_EDIT) }) {
-                Icon(Icons.Default.Add, contentDescription = "Tambah")
-            }
+            // kalau mau tetap ada FAB atas-plus, boleh
+            // kalau mau mirip figma banget, bisa dihapus dan pakai tombol + di navbar saja
+        },
+        bottomBar = {
+            BottomBar(navController)   // 🔹 ini yang nambah navbar
         }
     ) { padding ->
 
@@ -68,25 +80,57 @@ fun HomeScreen(navController: NavController, vm: HomeViewModel) {
 
             Spacer(Modifier.height(12.dp))
 
-            // Ringkasan income / expense / saldo
-            val saldo = state.totalIncome - state.totalExpense
-
+            // 🔹 Kartu biru Net Balance (seperti di figma)
             ElevatedCard(
                 modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                ),
                 elevation = CardDefaults.elevatedCardElevation()
             ) {
                 Column(
-                    modifier = Modifier.padding(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("Ringkasan Bulan Ini", style = MaterialTheme.typography.titleMedium)
-                    Text("Total Pemasukan: Rp ${state.totalIncome}")
-                    Text("Total Pengeluaran: Rp ${state.totalExpense}")
-                    Text("Saldo: Rp $saldo")
+                    Text(
+                        text = "Net Balance: IDR",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                    Text(
+                        text = "Rp ${formatter.format(saldo)}",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
                 }
             }
 
             Spacer(Modifier.height(12.dp))
+
+// 🔹 Baris 2 kartu kecil: Income & Expenses
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                SummaryStatCard(
+                    title = "Income",
+                    amountText = "Rp ${formatter.format(state.totalIncome)}",
+                    amountColor = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.weight(1f)
+                )
+
+                SummaryStatCard(
+                    title = "Expenses",
+                    amountText = "Rp ${formatter.format(state.totalExpense)}",
+                    amountColor = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(Modifier.height(12.dp))
+
 
             // 🔹 Baris Budget & Tracker
             Row(
@@ -256,37 +300,94 @@ fun HomeScreen(navController: NavController, vm: HomeViewModel) {
         }
     }
 
+
     if (showBudgetDialog) {
-        AlertDialog(
-            onDismissRequest = { showBudgetDialog = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        val cleaned = budgetInput.filter { it.isDigit() }
-                        budgetValue = cleaned.toLongOrNull() ?: 0L
-                        showBudgetDialog = false
-                    }
+        Dialog(onDismissRequest = { showBudgetDialog = false }) {
+
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                tonalElevation = 6.dp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Text("Simpan")
+
+                    // Judul
+                    Text(
+                        text = "Budget",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+
+                    // Input Budget
+                    OutlinedTextField(
+                        value = budgetInput,
+                        onValueChange = { budgetInput = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("Rp 0") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+
+                    // Tombol Done lebar
+                    Button(
+                        onClick = {
+                            val cleaned = budgetInput.filter { it.isDigit() }
+                            budgetValue = cleaned.toLongOrNull() ?: 0L
+                            showBudgetDialog = false
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("Done")
+                    }
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { showBudgetDialog = false }) {
-                    Text("Batal")
-                }
-            },
-            title = { Text("Set Budget Bulanan") },
-            text = {
-                OutlinedTextField(
-                    value = budgetInput,
-                    onValueChange = { budgetInput = it },
-                    label = { Text("Nominal Budget (Rp)") },
-                    singleLine = true
-                )
             }
-        )
+        }
+    }
+
+
+}
+
+@Composable
+fun SummaryStatCard(
+    title: String,
+    amountText: String,
+    amountColor: Color,
+    modifier: Modifier = Modifier
+) {
+    ElevatedCard(
+        modifier = modifier,
+        elevation = CardDefaults.elevatedCardElevation()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelMedium
+            )
+            Text(
+                text = amountText,
+                style = MaterialTheme.typography.titleMedium,
+                color = amountColor
+            )
+        }
     }
 }
+
 
 @Composable
 fun ExpensePieChart(

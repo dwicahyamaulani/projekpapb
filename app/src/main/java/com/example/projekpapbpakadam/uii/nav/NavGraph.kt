@@ -2,6 +2,8 @@ package com.example.projekpapbpakadam.uii.nav
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
@@ -12,6 +14,7 @@ import com.example.projekpapbpakadam.uii.home.HomeScreen
 import com.example.projekpapbpakadam.uii.home.HomeViewModel
 import com.example.projekpapbpakadam.uii.detail.DetailScreen
 import com.example.projekpapbpakadam.uii.settings.SettingsScreen
+import com.example.projekpapbpakadam.uii.history.HistoryScreen
 
 object Routes {
     const val HOME = "home"
@@ -19,6 +22,9 @@ object Routes {
     const val ADD_EDIT_OPT = "add_edit?id={id}"
     const val DETAIL = "detail/{id}"
     const val SETTINGS = "settings"
+
+    const val HISTORY = "history"   // 🔹 TAMBAHAN BARU
+
 }
 
 @Composable
@@ -48,8 +54,13 @@ fun AppNavGraph(navController: NavHostController, repo: ExpenseRepository) {
             AddEditScreen(navController, vm)
         }
 
-
-
+        composable(Routes.HISTORY) {
+            val vm: HomeViewModel = viewModel(factory = object : ViewModelProvider.Factory {
+                override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                    HomeViewModel(repo) as T
+            })
+            HistoryScreen(navController, vm)
+        }
         composable(Routes.DETAIL) { DetailScreen(navController) }
         composable(Routes.SETTINGS) { SettingsScreen(navController) }
     }

@@ -1,5 +1,8 @@
 package com.example.projekpapbpakadam.uii.home
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.projekpapbpakadam.data.local.ExpenseEntity
@@ -14,29 +17,37 @@ data class HomeState(
     val totalExpense: Long = 0L,
     val expenseByCategory: Map<String, Long> = emptyMap(),
     val loading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val showBudgetDialog: Boolean = false,
 )
 
 class HomeViewModel(private val repo: ExpenseRepository) : ViewModel() {
 
-    val state: StateFlow<HomeState> =
-        repo.observeAll()
-            .map { list ->
-                // 🔹 hitung hanya untuk BULAN & TAHUN SEKARANG
-                val nowCal = Calendar.getInstance()
-                val curMonth = nowCal.get(Calendar.MONTH)
-                val curYear = nowCal.get(Calendar.YEAR)
+    private val _state = MutableStateFlow(HomeState())
+    val state: StateFlow<HomeState> = _state
 
-                fun isThisMonth(epochMillis: Long): Boolean {
+    init {
+        observeExpenses()
+    }
+
+    private fun observeExpenses() {
+        repo.observeAll()
+            .onEach { list ->
+
+                val now = Calendar.getInstance()
+                val month = now.get(Calendar.MONTH)
+                val year = now.get(Calendar.YEAR)
+
+                fun isThisMonth(epoch: Long): Boolean {
                     val c = Calendar.getInstance()
-                    c.timeInMillis = epochMillis
-                    return c.get(Calendar.MONTH) == curMonth &&
-                            c.get(Calendar.YEAR) == curYear
+                    c.timeInMillis = epoch
+                    return c.get(Calendar.MONTH) == month &&
+                            c.get(Calendar.YEAR) == year
                 }
 
                 val monthly = list.filter { isThisMonth(it.dateEpochMillis) }
 
-                val income = monthly
+                val incomeTotal = monthly
                     .filter { it.type == "INCOME" }
                     .sumOf { it.amount }
 
@@ -47,19 +58,40 @@ class HomeViewModel(private val repo: ExpenseRepository) : ViewModel() {
                     .groupBy { it.category.ifBlank { "Others" } }
                     .mapValues { (_, items) -> items.sumOf { it.amount } }
 
-                HomeState(
-                    items = list,
-                    totalIncome = income,
-                    totalExpense = expenseTotal,
-                    expenseByCategory = byCategory
-                )
+                _state.update {
+                    it.copy(
+                        items = list,
+                        totalIncome = incomeTotal,
+                        totalExpense = expenseTotal,
+                        expenseByCategory = byCategory,
+                        loading = false,
+                        error = null
+                    )
+                }
             }
-            .stateIn(
-                viewModelScope,
-                SharingStarted.WhileSubscribed(5_000),
-                HomeState()
-            )
+            .catch { err ->
+                _state.update { it.copy(error = err.message, loading = false) }
+            }
+            .launchIn(viewModelScope)
+    }
 
-    fun sync() = viewModelScope.launch { runCatching { repo.sync() } }
-    fun delete(id: String) = viewModelScope.launch { repo.delete(id) }
+    fun sync() = viewModelScope.launch {
+        _state.update { it.copy(loading = true) }
+        runCatching { repo.sync() }
+            .onSuccess {
+                _state.update { it.copy(loading = false) }
+            }
+            .onFailure { e ->
+                _state.update { it.copy(error = e.message, loading = false) }
+            }
+    }
+
+    fun delete(id: String) = viewModelScope.launch {
+        repo.delete(id)
+    }
+
+    // Control dialog UI
+    fun setBudgetDialog(show: Boolean) {
+        _state.update { it.copy(showBudgetDialog = show) }
+    }
 }

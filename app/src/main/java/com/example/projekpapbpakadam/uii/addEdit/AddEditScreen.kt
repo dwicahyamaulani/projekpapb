@@ -33,6 +33,9 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import android.app.DatePickerDialog
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.BorderStroke
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -129,17 +132,25 @@ fun AddEditScreen(
                 }
             )
         },
-        floatingActionButton = {
-            FloatingActionButton(onClick = { vm.save { navController.popBackStack() } }) {
+        bottomBar = {
+            // Tombol Save lebar di bawah (seperti figma)
+            Button(
+                onClick = { vm.save { navController.popBackStack() } },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
                 Text("Simpan")
             }
-        }
+        },
+
     ) { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
             // Pilih jenis transaksi
@@ -247,11 +258,20 @@ fun AddEditScreen(
                         }
                     )
                 } else {
-                    // Tombol untuk minta permission + buka kamera
-                    Button(
+                    // Tombol outline lebar untuk ambil foto (mirip figma)
+                    OutlinedButton(
                         onClick = { launcherPermission.launch(Manifest.permission.CAMERA) },
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    ) { Text("📸 Ambil Foto Struk (CameraX)") }
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+                    ) {
+                        Text(
+                            text = "Ambil Foto Struk",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
                 }
 
                 if (ui.photoLocalPath != null) {
