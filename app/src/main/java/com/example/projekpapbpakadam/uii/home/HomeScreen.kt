@@ -48,50 +48,41 @@ fun HomeScreen(navController: NavController, vm: HomeViewModel) {
     val saldo = state.totalIncome - state.totalExpense
     val budgetTracker = budgetValue - state.totalExpense
 
-    Scaffold(
-        floatingActionButton = {
-            // kalau mau tetap ada FAB atas-plus, boleh
-            // kalau mau mirip figma banget, bisa dihapus dan pakai tombol + di navbar saja
-        },
-        bottomBar = {
-            BottomBar(navController)   // 🔹 ini yang nambah navbar
-        }
-    ) { padding ->
-
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // 🔹 HEADER
+        item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "PocketSpends 🪙",
+                    text = "💰 PocketSpends",
                     style = MaterialTheme.typography.headlineMedium,
                     modifier = Modifier.weight(1f)
                 )
+
+                // Tombol Sync
                 Button(onClick = { vm.sync() }) {
-                    Text("🔄 Sync Sekarang")
+                    Text("🔄 Sync")
                 }
             }
+        }
 
-            Spacer(Modifier.height(12.dp))
-
-            // 🔹 Kartu biru Net Balance (seperti di figma)
+        // 🔹 Net Balance Card
+        item {
             ElevatedCard(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.elevatedCardColors(
                     containerColor = MaterialTheme.colorScheme.primary
-                ),
-                elevation = CardDefaults.elevatedCardElevation()
+                )
             ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
+                    modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
@@ -106,10 +97,10 @@ fun HomeScreen(navController: NavController, vm: HomeViewModel) {
                     )
                 }
             }
+        }
 
-            Spacer(Modifier.height(12.dp))
-
-// 🔹 Baris 2 kartu kecil: Income & Expenses
+        // 🔹 Income & Expenses Cards
+        item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -128,177 +119,174 @@ fun HomeScreen(navController: NavController, vm: HomeViewModel) {
                     modifier = Modifier.weight(1f)
                 )
             }
+        }
 
-            Spacer(Modifier.height(12.dp))
-
-
-            // 🔹 Baris Budget & Tracker
+        // 🔹 Budget & Tracker
+        item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Kartu "Budget This Month"
+                // Budget this month
                 ElevatedCard(
-                    modifier = Modifier.weight(1f),
-                    elevation = CardDefaults.elevatedCardElevation()
+                    modifier = Modifier.weight(1f)
                 ) {
                     Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                        modifier = Modifier.padding(12.dp)
                     ) {
-                        Text("Budget This Month", style = MaterialTheme.typography.labelMedium)
+                        Text("Budget This Month")
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Rp ${formatter.format(budgetValue)}",
+                                "Rp ${formatter.format(budgetValue)}",
                                 style = MaterialTheme.typography.titleMedium,
                                 modifier = Modifier.weight(1f)
                             )
-                            IconButton(
-                                onClick = {
-                                    budgetInput = if (budgetValue > 0) budgetValue.toString() else ""
-                                    showBudgetDialog = true
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = "Edit Budget"
-                                )
+                            IconButton(onClick = {
+                                budgetInput = if (budgetValue > 0) budgetValue.toString() else ""
+                                showBudgetDialog = true
+                            }) {
+                                Icon(Icons.Default.Edit, contentDescription = null)
                             }
                         }
                     }
                 }
 
-                // Kartu "Budget Tracker"
+                // Budget tracker
                 ElevatedCard(
-                    modifier = Modifier.weight(1f),
-                    elevation = CardDefaults.elevatedCardElevation()
+                    modifier = Modifier.weight(1f)
                 ) {
                     Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                        modifier = Modifier.padding(12.dp)
                     ) {
-                        Text("Budget Tracker", style = MaterialTheme.typography.labelMedium)
-
+                        Text("Budget Tracker")
                         Text(
-                            text = "Rp ${formatter.format(budgetTracker)}",
+                            "Rp ${formatter.format(budgetTracker)}",
                             style = MaterialTheme.typography.titleMedium,
                             color = if (budgetTracker >= 0)
                                 MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.error
+                            else MaterialTheme.colorScheme.error
                         )
-
                         Text(
-                            text = if (budgetTracker >= 0)
-                                "Masih dalam batas 😊"
-                            else
-                                "Melebihi budget 😬",
+                            if (budgetTracker >= 0) "Masih dalam batas 😊"
+                            else "Melebihi budget 😬",
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
                 }
             }
+        }
 
-            Spacer(Modifier.height(12.dp))
-
-            // Setelah Spacer(Modifier.height(12.dp)) yang di bawah budget
-            if (state.expenseByCategory.isNotEmpty()) {
+        // 🔹 Pie Chart
+        if (state.expenseByCategory.isNotEmpty()) {
+            item {
                 ElevatedCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    elevation = CardDefaults.elevatedCardElevation()
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
+                        modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(
-                            text = "This Month's Expenses",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-
-                        ExpensePieChart(
-                            data = state.expenseByCategory
-                        )
+                        Text("This Month's Expenses")
+                        ExpensePieChart(data = state.expenseByCategory)
                     }
                 }
-
-                Spacer(Modifier.height(12.dp))
             }
+        }
 
+        // 🔹 Title: Transaction + See more
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Transaction",
+                    style = MaterialTheme.typography.titleMedium
+                )
 
-            if (state.items.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                TextButton(
+                    onClick = { navController.navigate(Routes.HISTORY) }
                 ) {
-                    Text("Belum ada pengeluaran.")
+                    Text("See More")
                 }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+            }
+        }
+
+        // 🔹 LIST 3 TRANSAKSI TERBARU
+        val latestItems = state.items
+            .filter { it.type == "EXPENSE" || it.type == "INCOME" }
+            .sortedByDescending { it.dateEpochMillis }
+            .take(3)
+
+        if (latestItems.isEmpty()) {
+            item {
+                Text(
+                    text = "Belum ada transaksi.",
+                    modifier = Modifier.padding(vertical = 12.dp)
+                )
+            }
+        } else {
+            items(latestItems, key = { it.id }) { e ->
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { navController.navigate("detail/${e.id}") }
                 ) {
-                    items(state.items, key = { it.id }) { e ->
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            elevation = CardDefaults.cardElevation(4.dp),
-                            onClick = { navController.navigate("detail/${e.id}") }
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        val thumbUri = remember(e.localPhotoPath, e.remotePhotoUrl) {
+                            e.localPhotoPath?.let(Uri::parse)
+                                ?: e.remotePhotoUrl?.let(Uri::parse)
+                        }
+
+                        if (thumbUri != null) {
+                            Image(
+                                painter = rememberAsyncImagePainter(thumbUri),
+                                contentDescription = null,
+                                modifier = Modifier.size(48.dp),
+                                contentScale = ContentScale.Crop
+                            )
+                            Spacer(Modifier.width(10.dp))
+                        }
+
+                        Column(
+                            modifier = Modifier.weight(1f)
                         ) {
-                            Row(
-                                modifier = Modifier.padding(12.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                val thumbUri = remember(e.localPhotoPath, e.remotePhotoUrl) {
-                                    e.localPhotoPath?.let(Uri::parse)
-                                        ?: e.remotePhotoUrl?.let(Uri::parse)
-                                }
-                                if (thumbUri != null) {
-                                    Image(
-                                        painter = rememberAsyncImagePainter(thumbUri),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(56.dp),
-                                        contentScale = ContentScale.Crop
-                                    )
-                                    Spacer(Modifier.width(12.dp))
-                                }
+                            Text(e.title)
+                            Text("Rp ${formatter.format(e.amount)}")
 
-                                Column(Modifier.weight(1f)) {
-                                    Text(e.title, style = MaterialTheme.typography.titleMedium)
-                                    Text("Rp ${e.amount}", style = MaterialTheme.typography.bodyMedium)
+                            Text(
+                                if (e.type == "INCOME")
+                                    "Pemasukan • ${e.category}"
+                                else
+                                    "Pengeluaran • ${e.category}",
+                            )
+                        }
 
-                                    Text(
-                                        text = if (e.type == "INCOME") "Pemasukan • ${e.category}"
-                                        else "Pengeluaran • ${e.category}",
-                                        style = MaterialTheme.typography.labelSmall
-                                    )
-                                }
+                        IconButton(onClick = {
+                            navController.navigate("add_edit?id=${e.id}")
+                        }) {
+                            Icon(Icons.Default.Edit, contentDescription = "Edit")
+                        }
 
-                                IconButton(onClick = {
-                                    navController.navigate("add_edit?id=${e.id}")
-                                }) {
-                                    Icon(Icons.Default.Edit, contentDescription = "Edit")
-                                }
-                                IconButton(onClick = { vm.delete(e.id) }) {
-                                    Icon(Icons.Default.Delete, contentDescription = "Hapus")
-                                }
-                            }
+                        IconButton(onClick = { vm.delete(e.id) }) {
+                            Icon(Icons.Default.Delete, contentDescription = "Hapus")
                         }
                     }
                 }
             }
         }
+
     }
+
+
 
 
     if (showBudgetDialog) {

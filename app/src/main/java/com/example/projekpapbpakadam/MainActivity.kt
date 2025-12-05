@@ -14,6 +14,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.example.projekpapbpakadam.ui.theme.ProjekPAPBPakAdamTheme
 import com.example.projekpapbpakadam.uii.nav.AppNavGraph
+import com.example.projekpapbpakadam.uii.nav.BottomBar
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.getValue
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.projekpapbpakadam.uii.nav.Routes
 
 
 class MainActivity : ComponentActivity() {
@@ -22,14 +28,34 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ProjekPAPBPakAdamTheme {
+
                 val navController = rememberNavController()
                 val repo = (application as App).repository
 
-                AppNavGraph(navController = navController, repo = repo)
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentRoute = navBackStackEntry?.destination?.route
+
+                Scaffold(
+                    bottomBar = {
+                        if (currentRoute != Routes.SPLASH) {
+                            BottomBar(navController = navController)
+                        }
+                    }
+                ) { padding ->   // padding dari Scaffold
+                    Box(
+                        modifier = Modifier.padding(padding)
+                    ) {
+                        AppNavGraph(
+                            navController = navController,
+                            repo = repo,
+                        )
+                    }
+                }
             }
         }
     }
 }
+
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {

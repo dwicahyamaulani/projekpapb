@@ -60,7 +60,7 @@ class HomeViewModel(private val repo: ExpenseRepository) : ViewModel() {
 
                 _state.update {
                     it.copy(
-                        items = list,
+                        items = monthly, // ⬅ INI FIX PENTING
                         totalIncome = incomeTotal,
                         totalExpense = expenseTotal,
                         expenseByCategory = byCategory,
