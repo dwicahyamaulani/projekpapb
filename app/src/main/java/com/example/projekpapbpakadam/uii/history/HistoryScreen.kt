@@ -51,8 +51,7 @@ fun HistoryScreen(
     }
 
     val monthlyList = state.items
-        .filter { it.type == "EXPENSE" } // hanya pengeluaran
-        .filter(::isForSelectedMonth)     // filter bulan
+        .filter(::isForSelectedMonth)
         .sortedByDescending { it.dateEpochMillis }
 
     Scaffold(
@@ -185,8 +184,14 @@ fun HistoryScreen(
                                     horizontalAlignment = Alignment.End
                                 ) {
                                     Text(
-                                        "-Rp ${formatter.format(e.amount)}",
-                                        color = MaterialTheme.colorScheme.error,
+                                        text = if (e.type == "INCOME")
+                                            "+Rp ${formatter.format(e.amount)}"
+                                        else
+                                            "-Rp ${formatter.format(e.amount)}",
+                                        color = if (e.type == "INCOME")
+                                            MaterialTheme.colorScheme.primary
+                                        else
+                                            MaterialTheme.colorScheme.error,
                                         fontWeight = FontWeight.SemiBold
                                     )
                                     Icon(

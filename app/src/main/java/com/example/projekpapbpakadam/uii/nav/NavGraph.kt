@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
+import com.example.projekpapbpakadam.data.repository.BudgetRepository
 import com.example.projekpapbpakadam.data.repository.ExpenseRepository
 import com.example.projekpapbpakadam.uii.addEdit.AddEditScreen
 import com.example.projekpapbpakadam.uii.addEdit.AddEditViewModel
@@ -33,7 +34,7 @@ object Routes {
 }
 
 @Composable
-fun AppNavGraph(navController: NavHostController, repo: ExpenseRepository) {
+fun AppNavGraph(navController: NavHostController, repo: ExpenseRepository, budgetRepo: BudgetRepository) {
     NavHost(navController, startDestination = Routes.SPLASH) {
 
         composable(Routes.SPLASH) {
@@ -51,7 +52,10 @@ fun AppNavGraph(navController: NavHostController, repo: ExpenseRepository) {
                 parentEntry,
                 factory = object : ViewModelProvider.Factory {
                     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                        return HomeViewModel(repo) as T
+                        return HomeViewModel(
+                            repo = repo,
+                            budgetRepo = budgetRepo
+                        ) as T
                     }
                 }
             )
@@ -81,14 +85,7 @@ fun AppNavGraph(navController: NavHostController, repo: ExpenseRepository) {
                 navController.getBackStackEntry(Routes.HOME)
             }
 
-            val vm: HomeViewModel = viewModel(
-                parentEntry,
-                factory = object : ViewModelProvider.Factory {
-                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                        return HomeViewModel(repo) as T
-                    }
-                }
-            )
+            val vm: HomeViewModel = viewModel(parentEntry)
 
             HistoryScreen(navController, vm)
         }

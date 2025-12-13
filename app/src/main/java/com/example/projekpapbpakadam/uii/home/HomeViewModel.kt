@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.projekpapbpakadam.data.local.ExpenseEntity
+import com.example.projekpapbpakadam.data.repository.BudgetRepository
 import com.example.projekpapbpakadam.data.repository.ExpenseRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -19,15 +20,27 @@ data class HomeState(
     val loading: Boolean = false,
     val error: String? = null,
     val showBudgetDialog: Boolean = false,
+    val monthlyBudget: Long = 0L
 )
 
-class HomeViewModel(private val repo: ExpenseRepository) : ViewModel() {
+class HomeViewModel(private val repo: ExpenseRepository, private val budgetRepo: BudgetRepository) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState())
     val state: StateFlow<HomeState> = _state
 
     init {
         observeExpenses()
+        observeBudget()
+    }
+
+    private fun observeBudget() {
+        budgetRepo.observeCurrentMonth()
+            .onEach { budget ->
+                _state.update {
+                    it.copy(monthlyBudget = budget)
+                }
+            }
+            .launchIn(viewModelScope)
     }
 
     private fun observeExpenses() {
@@ -93,5 +106,9 @@ class HomeViewModel(private val repo: ExpenseRepository) : ViewModel() {
     // Control dialog UI
     fun setBudgetDialog(show: Boolean) {
         _state.update { it.copy(showBudgetDialog = show) }
+    }
+
+    fun setBudget(amount: Long) = viewModelScope.launch {
+        budgetRepo.setBudget(amount)
     }
 }

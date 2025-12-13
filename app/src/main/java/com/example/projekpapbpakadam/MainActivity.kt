@@ -31,6 +31,7 @@ class MainActivity : ComponentActivity() {
 
                 val navController = rememberNavController()
                 val repo = (application as App).repository
+                val app = application as App
 
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = navBackStackEntry?.destination?.route
@@ -47,7 +48,8 @@ class MainActivity : ComponentActivity() {
                     ) {
                         AppNavGraph(
                             navController = navController,
-                            repo = repo,
+                            repo = app.repository,
+                            budgetRepo = app.budgetRepository
                         )
                     }
                 }
